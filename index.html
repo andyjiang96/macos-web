@@ -11,7 +11,6 @@
 	<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/c/c9/Finder_Icon_macOS_Big_Sur.png" type="image/x-icon">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 	<link rel="manifest" href="https://googlechromelabs.github.io/pwa-examples/a2hs/manifest.json">
-    <link rel="manifest" href="/manifest.json">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<style>
         @keyframes rotate {
@@ -86,6 +85,11 @@
 			text-align: center;
 			position: absolute;
 			cursor: url(https://cdn.jsdelivr.net/gh/mengobs/Webintosh-Desktop/assets/cursors/pointer.svg), pointer !important;
+			color: white;
+		}
+
+		.icon input::selection{
+			background-color: #545e77;
 			color: white;
 		}
 
@@ -1414,7 +1418,7 @@ function isOverTrashbin(element) {
 
 function installApp(Appname, imageUrl, onclickFunction, topPosition = 50, leftPosition = 50) {
   const desktop = document.getElementById('desktop');
-  
+
   let uniqueAppName = Appname;
   let counter = 1;
 
@@ -1427,40 +1431,90 @@ function installApp(Appname, imageUrl, onclickFunction, topPosition = 50, leftPo
   newItem.classList.add('icon');
   newItem.setAttribute('data-app-name', uniqueAppName);
 
+  if (Appname === "New Folder" || Appname === "Background Images" || Appname === "Applications" || Appname === "About.pdf") {
+    newItem.setAttribute('data-renamable', 'true');
+  }
+
   const img = document.createElement('img');
   img.src = imageUrl;
   img.style.height = '40px';
   img.style.width = 'auto';
-  
   newItem.appendChild(img);
 
   const span = document.createElement('span');
   span.style.fontSize = '14px';
   span.textContent = uniqueAppName;
+
+  if (newItem.dataset.renamable) {
+    span.style.color = "white";
+  }
+
   newItem.appendChild(span);
 
   newItem.ondblclick = onclickFunction;
 
-newItem.onclick = function(event) {
+  if (newItem.dataset.renamable) {
+    span.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startRename(newItem, span);
+    });
+  }
+
+  newItem.onclick = function(event) {
     event.stopPropagation();
     newItem.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
     newItem.style.border = "1px solid rgba(255, 255, 255, 0.36)";
-    newItem.style.borderRadius = "4px"; 
-};
+    newItem.style.borderRadius = "4px";
+  };
 
-document.addEventListener('click', function() {
+  document.addEventListener('click', function() {
     newItem.style.backgroundColor = "";
     newItem.style.border = "";
     newItem.style.borderRadius = "";
-});
+  });
 
   newItem.style.top = `${topPosition}px`;
   newItem.style.left = `${leftPosition}px`;
 
   makeDraggable(newItem);
-
   desktop.appendChild(newItem);
   organize();
+}
+
+function startRename(icon, span) {
+  const oldName = span.textContent;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldName;
+  input.style.fontSize = '14px';
+  input.style.backgroundColor = 'rgba(180, 180, 180, 0.80)';
+  input.style.borderRadius = '4px';
+  input.style.border = '1px solid rgb(180, 180, 180)';
+  input.style.outline = 'none';
+  input.style.width = '60px';
+  input.style.textAlign = 'center';
+
+  input.autocapitalize = 'off';
+  input.autocomplete = 'off';
+  input.autocorrect = 'off';
+  input.spellcheck = false;
+
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function finishRename() {
+    const newName = input.value.trim() || oldName;
+    span.textContent = newName;
+    icon.setAttribute('data-app-name', newName);
+    input.replaceWith(span);
+  }
+
+  input.addEventListener('blur', finishRename);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') finishRename();
+  });
 }
 
 function makeDraggable(element) {
@@ -1561,7 +1615,6 @@ function makeDraggable(element) {
     );
   });
 }
-
 
 function cleartrash() {
     trash.src = 'https://www.icons101.com/icon_ico/id_72062/trashempty.ico';
@@ -1997,18 +2050,12 @@ const apps = {
 };
 
 const appStoreApps = {
-    chat: { name: "Chat", url: "https://docs.google.com/document/d/1ONv3M4u6U4PiP5LN41-kIVycj-7trHpKEs9tjnOMQvY/edit", icon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon-2023q4.ico" },
-    space: { name: "Rammerhead", url: "https://secretsubdomain1.caribbeanpremierhotels.com", icon: "https://secretsubdomain1.caribbeanpremierhotels.com/logo.png" },
-    dogeub: { name: "DogeUB", url: "https://vcuusa.coaching-tour.com/", icon: "https://i.postimg.cc/MGGJhtGm/130938124-s-200-v-4.png" },
     // pcl: { name: "Plain Craft Launcher", url: "https://script.google.com/macros/s/AKfycbzu1cvKZe_Esb_mjfSaG9EiBZ_w57T_Ue1_f-Te4_Kktf2axGZTUa2ILZ9eMda4cJnw7Q/exec", icon: "https://raw.githubusercontent.com/PCL-Community/PCL2-CE/master/Plain%20Craft%20Launcher%202/Images/icon.ico" },
     pvz2: { name: "PVZ 2", url: "https://tsisveryniche.tomayre.com/resources/semag/pvzge/index.html", icon: "https://i.postimg.cc/HkzCZFTj/Plants-Vs-Zombies-2-It-s-About-Time-Square-Icon-(Versions-4-5-1).png" },
     cookieclicker: { name: "Cookie Clicker", url: "https://tsisveryniche.tomayre.com/resources/semag/cookieclicker/index.html", icon: "https://i.postimg.cc/SKKbwVKT/Z1MOuui-D05ZN5Lk-Vm-MEv-KF0mq-Ac-Fkna-Q2j8s4d-Zi-O-LSPQX4EEA3RVJdl-QEtxe96ok.png" },
-    selenite: { name: "Selenite", url: "https://tsisveryniche.tomayre.com/", icon: "https://i.postimg.cc/L8DMCGmL/favicon.png" },
     //   python: { name: "Python", url: "https://trinket.io/embed/python3", icon: "https://img.icons8.com/?size=512&id=13441&format=png" },
     //   java: { name: "Java", url: "https://www.programiz.com/java-programming/online-compiler/", icon: "https://img.icons8.com/color/512/java-coffee-cup-logo.png" },
-    win11: { name: "Windows 11", url: "https://tsisveryniche.tomayre.com/resources/sppa/11/index.html", icon: "https://i.postimg.cc/Z5Hh7XJx/ne6ukkej06t71.png" },
     google: { name: "Google", url: "https://www.google.com/?igu=1", icon: "https://i.postimg.cc/wBBYSFBR/768px-Google-G-logo-svg.png" },
-    // linkopener: { name: "Link Opener", url: "https://script.google.com/a/macros/lps-students.org/s/AKfycbzc3aJF8-LQCcEzZ85Y98jIHxaRwV6pd0LzMhS0iWDr0GeyIF55FHiDlIQxWiNlerAIug/exec", icon: "https://web.kamihq.com/web/images/openwith.svg" }
 };
 
 const runningApps = {};
@@ -2195,13 +2242,6 @@ win.innerHTML = `
 
     } else if (key === "appstore") {
 
-    win.style.width = "500px";
-    win.style.height = "400px";
-    win.style.top = "100px";
-    win.style.left = "150px";
-    win.style.display = "flex";
-    win.style.flexDirection = "column";
-
     win.innerHTML = `
       <div class="app-titlebar">
         <div class="name">App Store</div>
@@ -2234,6 +2274,7 @@ win.innerHTML = `
             border:1px solid #ccc;
             border-radius:10px;
             background:#f0f0f0;
+            max-height: 200px;
         `;
 
         appDiv.innerHTML = `
@@ -2244,8 +2285,10 @@ win.innerHTML = `
             </span>
             <button style="
                 cursor:url(https://cdn.jsdelivr.net/gh/mengobs/Webintosh-Desktop/assets/cursors/pointer.svg),pointer;
-                padding:4px 6px;
-                border-radius:5px;
+                width: 80px;
+                height: 20px;
+                border-radius: 10px;
+                background-color: #dedede;
                 border:none;">
             </button>
         `;
@@ -2255,10 +2298,10 @@ win.innerHTML = `
         const updateBtn = () => {
             if (apps[key]) {
                 btn.textContent = "Uninstall";
-                btn.style.background = "#ff6666";
+                btn.style.color = "#ff6666";
             } else {
-                btn.textContent = "Download";
-                btn.style.background = "#66cc66";
+                btn.textContent = "Get";
+                btn.style.color = "#1e88ff";
             }
         };
 
@@ -2737,7 +2780,6 @@ maxMenu.addEventListener("click", (e) => {
     win.style.zIndex = ++maxZ;
 });
 
-
 const snapPreview = document.createElement("div");
 snapPreview.style.position = "fixed";
 snapPreview.style.background = "rgba(255,255,255,0.18)";
@@ -2745,16 +2787,71 @@ snapPreview.style.border = "1px solid rgba(255,255,255,0.35)";
 snapPreview.style.borderRadius = "10px";
 snapPreview.style.zIndex = 999998;
 snapPreview.style.pointerEvents = "none";
-// snapPreview.style.backdropFilter = "blur(2px)";
 snapPreview.style.display = "none";
 document.body.appendChild(snapPreview);
 
-let dragging = false, offsetX = 0, offsetY = 0;
+let dragging = false;
+let offsetX = 0;
+let offsetY = 0;
 let overlay = null;
+
+let snapTimer = null;
+let snapReady = false;
+let snapConfig = null;
+
+function checkSnap(targetX, targetY) {
+    const m = 1;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    const nearTop = targetY <= m;
+    const nearLeft = targetX <= m;
+    const nearRight = targetX + win.offsetWidth >= w - m;
+    const nearBottom = targetY + win.offsetHeight >= h - m;
+
+    if (nearLeft && nearTop) {
+        return { left: "0px", top: "28px", width: w / 2 + "px", height: (h - 20) / 2 + "px" };
+    }
+
+    if (nearRight && nearTop) {
+        return { left: w / 2 + "px", top: "28px", width: w / 2 + "px", height: (h - 20) / 2 + "px" };
+    }
+
+    if (nearLeft && nearBottom) {
+        return {
+            left: "0px",
+            top: 28 - 80 + (h - 20) / 2 + "px",
+            width: w / 2 + "px",
+            height: (h - 20) / 2 + "px"
+        };
+    }
+
+    if (nearRight && nearBottom) {
+        return {
+            left: w / 2 + "px",
+            top: 28 - 80 + (h - 20) / 2 + "px",
+            width: w / 2 + "px",
+            height: (h - 20) / 2 + "px"
+        };
+    }
+
+    if (nearTop) {
+        return { left: "0px", top: "28px", width: w + "px", height: (h - 100) + "px" };
+    }
+
+    if (nearLeft) {
+        return { left: "0px", top: "28px", width: w / 2 + "px", height: (h - 100) + "px" };
+    }
+
+    if (nearRight) {
+        return { left: w / 2 + "px", top: "28px", width: w / 2 + "px", height: (h - 100) + "px" };
+    }
+
+    return null;
+}
 
 titlebar.addEventListener("mousedown", e => {
     if (e.target.closest(".controls")) return;
-
     if (win.dataset.maximized === "true") return;
 
     dragging = true;
@@ -2767,10 +2864,7 @@ titlebar.addEventListener("mousedown", e => {
 
     overlay = document.createElement("div");
     overlay.style.position = "fixed";
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
+    overlay.style.inset = 0;
     overlay.style.zIndex = 999999;
     overlay.style.background = "transparent";
     document.body.appendChild(overlay);
@@ -2779,147 +2873,63 @@ titlebar.addEventListener("mousedown", e => {
         btn.classList.add("discon");
     });
 
-    win.querySelectorAll(".app-window .controls div").forEach(btn => {
+    win.querySelectorAll(".controls div").forEach(btn => {
         btn.classList.remove("discon");
     });
-
-    win.style.zIndex = ++maxZ;
 });
 
 document.addEventListener("mousemove", e => {
     if (!dragging) return;
 
-    let targetX = e.clientX - offsetX;
-    let targetY = e.clientY - offsetY;
+    const rawX = e.clientX - offsetX;
+    const rawY = e.clientY - offsetY;
 
     const maxX = window.innerWidth - win.offsetWidth;
-    const maxY = window.innerHeight - win.offsetHeight;
+    const clampedX = Math.min(Math.max(0, rawX), maxX);
+    const clampedY = Math.max(rawY, 28);
 
-    targetX = Math.min(Math.max(0, targetX), maxX);
-    targetY = Math.max(targetY, 0);
+    win.style.left = clampedX + "px";
+    win.style.top = clampedY + "px";
 
-    win.style.left = targetX + "px";
-    win.style.top = targetY + "px";
+    const snap = checkSnap(rawX, rawY);
 
-    if (targetY < 28) {
-        win.style.top = "28px";
+    if (snap) {
+        if (!snapTimer && !snapReady) {
+            snapTimer = setTimeout(() => {
+                snapReady = true;
+                snapConfig = snap;
+                snapPreview.style.display = "block";
+                Object.assign(snapPreview.style, snap);
+            }, 500);
+        }
+    } else {
+        clearTimeout(snapTimer);
+        snapTimer = null;
+        snapReady = false;
+        snapConfig = null;
+        snapPreview.style.display = "none";
     }
-
-const m = 1;
-const w = window.innerWidth;
-const h = window.innerHeight;
-
-snapPreview.style.display = "none";
-
-const nearTop = targetY <= m;
-const nearLeft = targetX <= m;
-const nearRight = targetX + win.offsetWidth >= w - m;
-const nearBottom = targetY + win.offsetHeight >= h - m;
-
-if (nearLeft && nearTop) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = "0px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 20) / 2 + "px";
-    return;
-}
-
-if (nearRight && nearTop) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = w / 2 + "px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 20) / 2 + "px";
-    return;
-}
-
-if (nearLeft && nearBottom) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = "0px";
-    snapPreview.style.top = 28 - 80 + (h - 20) / 2 + "px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 20) / 2 + "px";
-    return;
-}
-
-if (nearRight && nearBottom) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = w / 2 + "px";
-    snapPreview.style.top = 28 - 80 + (h - 20) / 2 + "px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 20) / 2 + "px";
-    return;
-}
-
-if (nearTop) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = "0px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w + "px";
-    snapPreview.style.height = (h - 100) + "px";
-    return;
-}
-
-if (nearBottom) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = "0px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w + "px";
-    snapPreview.style.height = (h - 100) + "px";
-    return;
-}
-
-if (nearLeft) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = "0px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 100) + "px";
-    return;
-}
-
-if (nearRight) {
-    snapPreview.style.display = "block";
-    snapPreview.style.left = w / 2 + "px";
-    snapPreview.style.top = "28px";
-    snapPreview.style.width = w / 2 + "px";
-    snapPreview.style.height = (h - 100) + "px";
-    return;
-}
 });
 
 document.addEventListener("mouseup", () => {
     if (!dragging) return;
     dragging = false;
 
+    clearTimeout(snapTimer);
+    snapTimer = null;
+
     if (overlay) {
         overlay.remove();
         overlay = null;
     }
 
-    const maxX = window.innerWidth - win.offsetWidth;
-    const maxY = window.innerHeight - win.offsetHeight;
-
-    if (win.offsetTop < 28) {
-        win.style.top = "28px";
-    }
-    if (win.offsetLeft < 0) {
-        win.style.left = "0px";
-    } else if (win.offsetLeft > maxX) {
-        win.style.left = maxX + "px";
-    }
-
-    if (snapPreview.style.display !== "none") {
-        win.style.left = snapPreview.style.left;
-        win.style.top = snapPreview.style.top;
-        win.style.width = snapPreview.style.width;
-        win.style.height = snapPreview.style.height;
+    if (snapReady && snapConfig) {
+        Object.assign(win.style, snapConfig);
         win.dataset.maximized = "false";
-        snapPreview.style.display = "none";
-        return;
     }
 
+    snapReady = false;
+    snapConfig = null;
     snapPreview.style.display = "none";
 });
 
@@ -4384,10 +4394,6 @@ document.addEventListener("mouseout", (e) => {
     }
     link.href = url;
   }
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
 
 history.pushState({}, "", "/");
 </script>
