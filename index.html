@@ -1291,7 +1291,7 @@
 <li style="display:flex;align-items:center;">Get Info</li>
 <li style="display:flex;align-items:center;" onclick="changebg();">Change Wallpaper... <small style="margin-left:auto;"><b>⌥</b> + Shift</small></li>
 <hr>
-<li style="display:flex;align-items:center;" onclick="organize();">Organize <small style="margin-left:auto;"><b>⌘</b> + Shift + O</small></li>
+<li style="display:flex;align-items:center;" id="installPWA">Install <small style="margin-left:auto;"></li>
 <li style="display:flex;align-items:center;" onclick="toggleFullscreen();">Fullscreen <small style="margin-left:auto;"><b>⌘</b> + F</small></li>
 <hr>
 <li id="notchtext" onclick="toggleNotch();">Show Notch</li>
@@ -4385,6 +4385,28 @@ document.addEventListener("mouseout", (e) => {
   }
 
 history.pushState({}, "", "/");
+
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+document.getElementById('installPWA').onclick = async () => {
+  if (!deferredPrompt) {
+    alert("Browser doesn't support installing");
+    return;
+  }
+
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+
+  if (choice.outcome === 'accepted') {
+  }
+
+  deferredPrompt = null;
+};
 </script>
 </body>
 </html>
