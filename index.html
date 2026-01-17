@@ -4,7 +4,10 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<title>&#8203;</title>
+	<title>MacOS Web</title>
+    <meta name="description" content="A web-based project that recreates the MacOS desktop experience.">
+    <meta name="keywords" content="MacOS, MacOS web">
+    <meta name="robots" content="index, follow">
 	<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/c/c9/Finder_Icon_macOS_Big_Sur.png" type="image/x-icon">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 	<link rel="manifest" href="https://googlechromelabs.github.io/pwa-examples/a2hs/manifest.json">
@@ -3851,6 +3854,7 @@ function startmeteor() {
                         image: "https://www.apple.com/v/app-store/c/images/overview/icon_appstore__ev0z770zyxoy_large_2x.png",
                         onDetail: () => createAppWindow("appstore")
                     });
+                    document.title = '\u200B';
                 }, 500);
             }, 500);
         }
